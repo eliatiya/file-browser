@@ -1,6 +1,7 @@
 import { childId, createTree, getNode, isLoaded, setChildren, toggleExpanded } from '../lib/tree.js';
 import { detailRows } from '../lib/details.js';
 import { getImageSize } from '../lib/image-size.js';
+import { isPreviewable } from '../lib/preview.js';
 import { isNavKey, navigate, resolveFocus } from '../lib/tree-nav.js';
 import { renderDetails, renderTree } from './render.js';
 
@@ -41,6 +42,21 @@ let focusedId = null;
 /** Bumped on every new folder pick and every selection, so stale async results are dropped. */
 let generation = 0;
 let selection = 0;
+/** @type {string | null} object URL of the image shown in the detail pane, if any */
+let previewUrl = null;
+
+/**
+ * Replaces the detail pane. The previous preview's object URL is revoked first, since an
+ * unreleased one keeps the whole file in memory; a new one is made only for a previewable file.
+ *
+ * @param {Array<{ label: string, value: string }> | null} rows
+ * @param {{ error?: string, file?: File }} [options]
+ */
+function showDetails(rows, { error, file } = {}) {
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = file && isPreviewable(file.type) ? URL.createObjectURL(file) : null;
+  renderDetails(detailsEl, rows, { error, previewUrl });
+}
 
 /** @param {string} message */
 function setStatus(message) {
@@ -73,7 +89,7 @@ async function chooseFolder() {
   selectedId = null;
   focusedId = null;
   setStatus('');
-  renderDetails(detailsEl, null);
+  showDetails(null);
   render();
   await loadChildren(tree.rootId);
 }
@@ -123,7 +139,7 @@ async function select(id) {
   if (node.kind === 'directory') {
     tree = toggleExpanded(tree, id);
     render();
-    renderDetails(detailsEl, detailRows(node));
+    showDetails(detailRows(node));
     if (tree.expanded.has(id)) await loadChildren(id);
     return;
   }
@@ -136,8 +152,7 @@ async function select(id) {
     const file = await handle.getFile();
     const dimensions = await readImageSize(file);
     if (token !== selection) return;
-    renderDetails(
-      detailsEl,
+    showDetails(
       detailRows({
         name: file.name,
         kind: 'file',
@@ -146,10 +161,11 @@ async function select(id) {
         lastModified: file.lastModified,
         dimensions,
       }),
+      { file },
     );
   } catch (err) {
     if (token !== selection) return;
-    renderDetails(detailsEl, null, `Couldn't read "${node.name}": ${errorMessage(err)}`);
+    showDetails(null, { error: `Couldn't read "${node.name}": ${errorMessage(err)}` });
   }
 }
 
@@ -213,11 +229,11 @@ treeEl.addEventListener('keydown', (event) => {
 
 if (showDirectoryPicker) {
   chooseButton.addEventListener('click', () => void chooseFolder());
-  renderDetails(detailsEl, null);
+  showDetails(null);
 } else {
   chooseButton.disabled = true;
   setStatus(
     'This browser can’t open local folders. Use a recent Chrome or Edge, and load the page from localhost or over HTTPS.',
   );
-  renderDetails(detailsEl, null);
+  showDetails(null);
 }

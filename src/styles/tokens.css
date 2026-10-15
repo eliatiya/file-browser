@@ -24,6 +24,10 @@
   --radius: 6px;
   --focus-ring-width: 2px;
   --tree-width: 320px;
+
+  --preview-max-height: 320px;
+  --preview-border: 1px solid var(--color-border);
+  --color-preview-bg: var(--color-surface);
 }
 
 @media (prefers-color-scheme: dark) {

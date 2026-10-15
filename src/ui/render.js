@@ -52,9 +52,10 @@ export function renderTree(container, tree, { selectedId, focusedId, loading }) 
 /**
  * @param {HTMLElement} container
  * @param {Array<{ label: string, value: string }> | null} rows null when nothing is selected
- * @param {string} [error]
+ * @param {{ error?: string, previewUrl?: string | null }} [options] previewUrl is an object URL
+ *   for an image shown above the details; without one there is no preview area at all
  */
-export function renderDetails(container, rows, error) {
+export function renderDetails(container, rows, { error, previewUrl } = {}) {
   if (error || !rows) {
     const p = document.createElement('p');
     p.className = error ? 'details-error' : 'details-empty';
@@ -71,5 +72,30 @@ export function renderDetails(container, rows, error) {
     dd.textContent = value;
     list.append(dt, dd);
   }
-  container.replaceChildren(list);
+  container.replaceChildren(...(previewUrl ? [renderPreview(previewUrl)] : []), list);
+}
+
+/**
+ * The image scaled to fit the pane. If it fails to decode, a short note replaces it so the
+ * pane never shows a broken-image icon.
+ *
+ * @param {string} url
+ * @returns {HTMLElement}
+ */
+function renderPreview(url) {
+  const figure = document.createElement('figure');
+  figure.className = 'details-preview';
+  const img = document.createElement('img');
+  img.className = 'details-preview-image';
+  img.alt = 'Preview';
+  img.decoding = 'async';
+  img.addEventListener('error', () => {
+    const note = document.createElement('p');
+    note.className = 'details-preview-unavailable';
+    note.textContent = 'Preview unavailable';
+    figure.replaceChildren(note);
+  });
+  img.src = url;
+  figure.append(img);
+  return figure;
 }

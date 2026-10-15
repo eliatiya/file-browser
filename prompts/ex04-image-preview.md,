@@ -1,0 +1,45 @@
+<!-- Exercise 4 — Claude 5–style prompt. Effort for this run: medium (set via effortLevel) -->
+
+Goal: when an image file is selected in the tree, the detail pane shows a
+preview of it, so I can see what a file is without leaving the explorer.
+
+Context: browser-only, read-only file explorer in plain HTML/CSS/vanilla JS
+ES modules, no build step. The detail pane already shows name, size, type,
+last modified and dimensions. src/lib/ is pure; src/ui/ does DOM and file
+access. Project rules are in CLAUDE.md.
+
+Scope: previews for PNG, JPEG, GIF and WebP, shown above the metadata,
+scaled down to fit the pane while keeping the aspect ratio. Folders and
+non-image files show no preview area at all. Out of scope: SVG, HEIC, zoom,
+thumbnails in the tree, EXIF.
+
+How to approach a few things:
+- Use URL.createObjectURL(file) for the image source, because it's local and
+  read-only, so it stays within the no-network rule. Revoke the previous URL
+  whenever the selection changes, because unreleased blob URLs keep the whole
+  file in memory.
+- Put the "is this previewable?" decision in src/lib/ as a pure function of
+  the MIME type, because that keeps it testable with node --test.
+- Use CSS variables from tokens.css for the preview's max height, border and
+  background, because styling is only allowed through tokens. Add tokens
+  there if you need them.
+- When a file fails to decode, show a short "Preview unavailable" line
+  instead of a broken image icon, because a broken icon looks like a bug in
+  the explorer.
+
+Done when:
+- Clicking a PNG, JPEG, GIF or WebP shows its preview; clicking a folder or a
+  .txt shows none.
+- Selecting several images quickly always ends on the last one selected,
+  never an earlier one that loaded late.
+- Unit tests cover the previewable-type function, including uppercase MIME
+  types and an empty type string.
+- `npm run check` passes. Run it yourself and include the result.
+- Commit everything, including prompts/ex04-image-preview.md, with message
+  "feat(detail): image preview".
+
+If you notice other bugs along the way, list them in your report and don't
+fix them. If you found none, say so.
+
+Report: files changed, check result, how I can verify in the browser, and
+other bugs noticed.

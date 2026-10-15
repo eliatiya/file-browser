@@ -9,6 +9,7 @@
   --color-selected-bg: #0066cc;
   --color-selected-text: #ffffff;
   --color-error: #c9182b;
+  --color-focus-ring: #0066cc;
 
   --font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-size-base: 14px;
@@ -21,6 +22,7 @@
   --space-4: 16px;
 
   --radius: 6px;
+  --focus-ring-width: 2px;
   --tree-width: 320px;
 }
 
@@ -35,5 +37,6 @@
     --color-selected-bg: #0a84ff;
     --color-selected-text: #ffffff;
     --color-error: #ff6961;
+    --color-focus-ring: #0a84ff;
   }
 }

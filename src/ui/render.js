@@ -3,13 +3,15 @@ import { getNode, visibleRows } from '../lib/tree.js';
 /** @typedef {import('../lib/tree.js').Tree} Tree */
 
 /**
- * Re-renders the visible rows of the tree.
+ * Re-renders the visible rows of the tree. Only the focused row is in the tab order (roving
+ * tabindex); if focus was inside the tree before the re-render, it moves to the new focused row.
  *
  * @param {HTMLElement} container
  * @param {Tree} tree
- * @param {{ selectedId: string | null, loading: ReadonlySet<string> }} state
+ * @param {{ selectedId: string | null, focusedId: string, loading: ReadonlySet<string> }} state
  */
-export function renderTree(container, tree, { selectedId, loading }) {
+export function renderTree(container, tree, { selectedId, focusedId, loading }) {
+  const hadFocus = container.contains(document.activeElement);
   const rows = visibleRows(tree).map(({ id, depth }) => {
     const node = getNode(tree, id);
     const isFolder = node.kind === 'directory';
@@ -22,6 +24,7 @@ export function renderTree(container, tree, { selectedId, loading }) {
     row.setAttribute('aria-level', String(depth + 1));
     row.setAttribute('aria-selected', String(id === selectedId));
     if (isFolder) row.setAttribute('aria-expanded', String(expanded));
+    row.tabIndex = id === focusedId ? 0 : -1;
     row.style.paddingInlineStart = `calc(var(--space-2) + ${depth} * var(--space-4))`;
 
     const twisty = document.createElement('span');
@@ -43,6 +46,7 @@ export function renderTree(container, tree, { selectedId, loading }) {
     return row;
   });
   container.replaceChildren(...rows);
+  if (hadFocus) rows.find((row) => row.tabIndex === 0)?.focus();
 }
 
 /**

@@ -1,5 +1,6 @@
 import { childId, createTree, getNode, isLoaded, setChildren, toggleExpanded } from '../lib/tree.js';
 import { detailRows } from '../lib/details.js';
+import { isNavKey, navigate, resolveFocus } from '../lib/tree-nav.js';
 import { renderDetails, renderTree } from './render.js';
 
 /** @typedef {import('../lib/tree.js').Tree} Tree */
@@ -34,6 +35,8 @@ let handles = new Map();
 let loading = new Set();
 /** @type {string | null} */
 let selectedId = null;
+/** @type {string | null} the row in the tab order; resolved to a visible row on every render */
+let focusedId = null;
 /** Bumped on every new folder pick and every selection, so stale async results are dropped. */
 let generation = 0;
 let selection = 0;
@@ -44,7 +47,9 @@ function setStatus(message) {
 }
 
 function render() {
-  if (tree) renderTree(treeEl, tree, { selectedId, loading });
+  if (!tree) return;
+  focusedId = resolveFocus(tree, focusedId);
+  renderTree(treeEl, tree, { selectedId, focusedId, loading });
 }
 
 async function chooseFolder() {
@@ -65,6 +70,7 @@ async function chooseFolder() {
   handles = new Map([[tree.rootId, root]]);
   loading = new Set();
   selectedId = null;
+  focusedId = null;
   setStatus('');
   renderDetails(detailsEl, null);
   render();
@@ -146,13 +152,36 @@ function errorMessage(err) {
   return err instanceof Error ? err.message : String(err);
 }
 
+/**
+ * Selects a row from a click or Enter.
+ *
+ * @param {string} id
+ */
+function activate(id) {
+  focusedId = id;
+  // Any selection change invalidates an in-flight file read for the previous one.
+  selection += 1;
+  void select(id);
+}
+
 treeEl.addEventListener('click', (event) => {
   const row = event.target instanceof Element ? event.target.closest('[data-id]') : null;
-  if (row instanceof HTMLElement && row.dataset.id !== undefined) {
-    // Any selection change invalidates an in-flight file read for the previous one.
-    selection += 1;
-    void select(row.dataset.id);
+  if (row instanceof HTMLElement && row.dataset.id !== undefined) activate(row.dataset.id);
+});
+
+treeEl.addEventListener('keydown', (event) => {
+  if (!tree || !isNavKey(event.key) || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  event.preventDefault();
+  const result = navigate(tree, focusedId, event.key);
+  if (result.activate) {
+    activate(result.focusedId);
+    return;
   }
+  const opened = result.tree.expanded.has(result.focusedId) && !tree.expanded.has(result.focusedId);
+  tree = result.tree;
+  focusedId = result.focusedId;
+  render();
+  if (opened) void loadChildren(focusedId);
 });
 
 if (showDirectoryPicker) {

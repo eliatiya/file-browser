@@ -64,6 +64,20 @@ body {
   color: var(--color-selected-text);
 }
 
+.tree-row:focus {
+  outline: none;
+}
+
+.tree-row:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+/* The ring would vanish against the selected background, so use the selected text color. */
+.tree-row[aria-selected="true"]:focus-visible {
+  outline-color: var(--color-selected-text);
+}
+
 .tree-twisty {
   flex: none;
   width: var(--space-4);

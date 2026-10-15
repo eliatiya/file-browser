@@ -37,3 +37,14 @@ export function formatDate(ms, { locale, timeZone } = {}) {
   }
   return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short', timeZone }).format(ms);
 }
+
+/**
+ * Formats pixel dimensions for display.
+ *
+ * @param {number} width
+ * @param {number} height
+ * @returns {string} e.g. "1920 × 1080 px"
+ */
+export function formatDimensions(width, height) {
+  return `${width} × ${height} px`;
+}

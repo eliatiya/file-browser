@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { formatBytes, formatDate } from '../src/lib/format.js';
+import { formatBytes, formatDate, formatDimensions } from '../src/lib/format.js';
 
 test('formatBytes: bytes stay unscaled', () => {
   assert.equal(formatBytes(0), '0 B');
@@ -42,4 +42,9 @@ test('formatDate: defaults to the local time zone', () => {
 test('formatDate: rejects invalid input', () => {
   assert.throws(() => formatDate(Number.NaN), RangeError);
   assert.throws(() => formatDate(Number.POSITIVE_INFINITY), RangeError);
+});
+
+test('formatDimensions: width × height in px with U+00D7', () => {
+  assert.equal(formatDimensions(1920, 1080), '1920 × 1080 px');
+  assert.equal(formatDimensions(10, 5), '10 × 5 px');
 });

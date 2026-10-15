@@ -1,5 +1,6 @@
 import { childId, createTree, getNode, isLoaded, setChildren, toggleExpanded } from '../lib/tree.js';
 import { detailRows } from '../lib/details.js';
+import { getImageSize } from '../lib/image-size.js';
 import { isNavKey, navigate, resolveFocus } from '../lib/tree-nav.js';
 import { renderDetails, renderTree } from './render.js';
 
@@ -133,14 +134,40 @@ async function select(id) {
   const token = selection;
   try {
     const file = await handle.getFile();
+    const dimensions = await readImageSize(file);
     if (token !== selection) return;
     renderDetails(
       detailsEl,
-      detailRows({ name: file.name, kind: 'file', size: file.size, type: file.type, lastModified: file.lastModified }),
+      detailRows({
+        name: file.name,
+        kind: 'file',
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+        dimensions,
+      }),
     );
   } catch (err) {
     if (token !== selection) return;
     renderDetails(detailsEl, null, `Couldn't read "${node.name}": ${errorMessage(err)}`);
+  }
+}
+
+/** Image headers sit at the start of the file; this much covers EXIF data before a JPEG frame. */
+const IMAGE_HEADER_BYTES = 262144;
+
+/**
+ * Pixel dimensions from the file's header, or null if it isn't a PNG, JPEG or GIF we can read.
+ * A failed read only hides the Dimensions row; it doesn't replace the other details.
+ *
+ * @param {File} file
+ * @returns {Promise<{ width: number, height: number } | null>}
+ */
+async function readImageSize(file) {
+  try {
+    return getImageSize(new Uint8Array(await file.slice(0, IMAGE_HEADER_BYTES).arrayBuffer()));
+  } catch {
+    return null;
   }
 }
 

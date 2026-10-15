@@ -140,3 +140,16 @@ test('detailRows: empty MIME type reads as Unknown', () => {
     { label: 'Type', value: 'Unknown' },
   ]);
 });
+
+test('detailRows: files with dimensions get a Dimensions row last', () => {
+  const rows = detailRows({ name: 'a.png', kind: 'file', size: 1, type: 'image/png', lastModified: 0, dimensions: { width: 1920, height: 1080 } });
+  assert.equal(rows.length, 5);
+  assert.deepEqual(rows[4], { label: 'Dimensions', value: '1920 × 1080 px' });
+});
+
+test('detailRows: no Dimensions row when dimensions are null or absent', () => {
+  const base = { name: 'a.txt', kind: /** @type {const} */ ('file'), size: 1, type: 'text/plain', lastModified: 0 };
+  assert.equal(detailRows({ ...base, dimensions: null }).length, 4);
+  assert.equal(detailRows(base).length, 4);
+  assert.equal(detailRows({ ...dir('Photos'), dimensions: { width: 1, height: 1 } }).length, 2);
+});

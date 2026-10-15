@@ -23,15 +23,14 @@ eslint.config.js        eslint flat config
 
 ## Hard rules
 
-1. **`src/lib/` is framework-free and DOM-free.** Pure functions only: no `document`, `window`
-   or imports from `src/ui/`. All DOM work goes in `src/ui/`.
-2. **No network, no storage, no writes.** No network calls (`fetch`, `XMLHttpRequest`,
-   WebSocket, EventSource, sendBeacon, external `http(s)://` URLs), no `localStorage`,
-   `sessionStorage` or IndexedDB, and no file writes (`showSaveFilePicker`, `createWritable`,
-   `readwrite` mode). Folder access is read-only.
+1. **Pure core:** `src/lib/` is framework-free and DOM-free; all DOM work goes in
+   `src/ui/`. Details: `.claude/rules/lib-purity.md` (loads when working in `src/lib/`).
+2. **Offline and read-only:** no network, no storage, no writes.
+   Details: `.claude/rules/no-network-storage.md`.
 3. **All styling uses CSS variables defined only in `src/styles/tokens.css`.** No hex colors,
    color functions (`rgb()`, `hsl()`, …) or `--custom-property:` definitions in any other CSS or
-   HTML file.
+   HTML file. `tests/rules.test.js` treats any `#hex`-looking token in CSS/HTML as a color, so
+   avoid ids or fragments like `#fade` or `#bad`.
 4. **`npm run check` must stay green**: `tsc --noEmit` (checkJs + strict, types via JSDoc),
    eslint, and `node --test`.
 

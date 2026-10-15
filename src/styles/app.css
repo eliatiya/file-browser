@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+#app {
+  font-size: var(--font-size-title);
+}

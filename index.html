@@ -9,6 +9,17 @@
     <script type="module" src="src/ui/main.js"></script>
   </head>
   <body>
-    <main id="app"></main>
+    <header class="toolbar">
+      <button type="button" id="choose-folder">Choose folder</button>
+      <p id="status" class="status" role="status"></p>
+    </header>
+    <main id="app" class="layout">
+      <nav class="tree-pane" aria-label="Folder tree">
+        <div id="tree" role="tree" aria-label="Files"></div>
+      </nav>
+      <section class="detail-pane" aria-label="Details">
+        <div id="details"></div>
+      </section>
+    </main>
   </body>
 </html>

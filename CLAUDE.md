@@ -36,6 +36,7 @@ Folder access via showDirectoryPicker, so Chromium (Chrome/Edge) on localhost.
 - `npm run check` — tsc + eslint + all tests. Run before saying a task is done.
 - `node --test tests/<name>.test.js` — run one test file.
 - `python -m http.server 8000` (repo root) — then open http://localhost:8000
+- codebase-memory-mcp must be installed and on PATH (see DeusData/codebase-memory-mcp) for the code graph.
 
 ## Open questions (ask, don't guess)
 - Firefox/Safari: add a webkitdirectory fallback, or stay Chromium-only?

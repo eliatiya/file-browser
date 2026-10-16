@@ -124,6 +124,10 @@ body {
   overflow-wrap: anywhere;
 }
 
+.details-list .details-warning {
+  color: var(--color-warning);
+}
+
 .details-preview {
   display: flex;
   justify-content: center;

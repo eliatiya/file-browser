@@ -51,7 +51,8 @@ export function renderTree(container, tree, { selectedId, focusedId, loading }) 
 
 /**
  * @param {HTMLElement} container
- * @param {Array<{ label: string, value: string }> | null} rows null when nothing is selected
+ * @param {Array<{ label: string, value: string, warning?: boolean }> | null} rows null when
+ *   nothing is selected; a row with `warning` shows its value in the warning color
  * @param {{ error?: string, previewUrl?: string | null }} [options] previewUrl is an object URL
  *   for an image shown above the details; without one there is no preview area at all
  */
@@ -65,11 +66,12 @@ export function renderDetails(container, rows, { error, previewUrl } = {}) {
   }
   const list = document.createElement('dl');
   list.className = 'details-list';
-  for (const { label, value } of rows) {
+  for (const { label, value, warning } of rows) {
     const dt = document.createElement('dt');
     dt.textContent = label;
     const dd = document.createElement('dd');
     dd.textContent = value;
+    if (warning) dd.className = 'details-warning';
     list.append(dt, dd);
   }
   container.replaceChildren(...(previewUrl ? [renderPreview(previewUrl)] : []), list);

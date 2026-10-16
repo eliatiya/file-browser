@@ -14,12 +14,22 @@ export default [
     rules: {
       'no-restricted-globals': [
         'error',
-        { name: 'document', message: 'src/lib must be DOM-free; do DOM work in src/ui.' },
-        { name: 'window', message: 'src/lib must be DOM-free; do DOM work in src/ui.' },
+        ...['document', 'window', 'navigator'].map((name) => ({
+          name,
+          message: 'src/lib must stay DOM-free (it runs under node --test); do browser work in src/ui and pass plain data in.',
+        })),
       ],
       'no-restricted-imports': [
         'error',
-        { patterns: [{ group: ['**/ui/**', '**/ui'], message: 'src/lib must not import from src/ui.' }] },
+        {
+          patterns: [
+            {
+              // Relative paths that climb out of src/lib into ui: ../ui, ../ui/x.js, ../../src/ui/x.js
+              regex: '^(?:\\./)?(?:\\.\\./)+(?:src/)?ui(?:/|$)',
+              message: 'src/lib must not import from src/ui; ui calls lib, never the reverse.',
+            },
+          ],
+        },
       ],
     },
   },
